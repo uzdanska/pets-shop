@@ -1,0 +1,75 @@
+{% comment %} <form method="get" action="{% url 'product-list' %}">
+    <input type="text" name="name" placeholder="Nazwa" value="{{ name }}">
+    <input type="text" name="category" placeholder="Kategoria" value="{{ category }}">
+    <input type="text" name="description" placeholder="Opis" value="{{ description }}">
+    <button type="submit">Filtruj</button>
+</form> {% endcomment %}
+
+<table>
+    <thead>
+        <tr>
+            <th>Nazwa</th>
+            <th>Kategoria</th>
+            <th>Opis</th>
+            <th>Cena</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for product in products %}
+            <tr>
+                <td>{{ product.name }}</td>
+                <td>{{ product.category }}</td>
+                <td>{{ product.description }}</td>
+                <td>{{ product.price }}</td>
+                {% comment %} <td><button>Delete</button></td> {% endcomment %}
+                <td>
+                    <form method="post" action="{% url 'delete_product' product.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="delete-button">Usun</button>
+                    </form>
+                </td>
+                <td>
+                    <form method="post" action="{% url 'edit_product' product.id %}">
+                        {% csrf_token %}
+                        <button type="submit">Edytuj</button>
+                    </form>
+                </td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="4">Brak produktów</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<button> <a href='/products/add'>Dodaj produkt<a></button>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var deleteButtons = document.querySelectorAll('.delete-button');
+        deleteButtons.forEach(function(button) {
+            button.addEventListener('click', function() {
+                var confirmation = confirm("Czy jesteś pewien usunięcia?");
+                if (confirmation) {
+                        // Tutaj umieść kod, który wywoła usunięcie produktu, na przykład AJAX request lub przekierowanie do widoku usuwania
+                }
+            });
+        });
+    });
+</script>
+<div class="pagination">
+    <span class="step-links">
+        {% if products.has_previous %}
+            <a href="?page=1">&laquo; pierwsza</a>
+            <a href="?page={{ products.previous_page_number }}">poprzednia</a>
+        {% endif %}
+
+        <span class="current">
+            Strona {{ products.number }} z {{ products.paginator.num_pages }}.
+        </span>
+
+        {% if products.has_next %}
+            <a href="?page={{ products.next_page_number }}">następna</a>
+            <a href="?page={{ products.paginator.num_pages }}">ostatnia &raquo;</a>
+        {% endif %}
+    </span>
+</div>
