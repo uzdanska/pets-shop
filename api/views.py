@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import ListView, UpdateView
+from .forms import ProductForm
 from django.core.paginator import Paginator
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -12,22 +13,23 @@ class ProductListView(ListView):
     model = Product
     template_name = 'product_list.html'
     context_object_name = 'products'
-    # paginate_by = 10 
+    paginate_by = 10 
 
     def get_queryset(self):
         queryset = Product.objects.all()
         name = self.request.GET.get('name')
         category = self.request.GET.get('category')
         description = self.request.GET.get('description')
-        # min_price = self.request.GET.get('min_price')
-        # max_price = self.request.GET.get('max_price')
+        price = self.request.GET.get('price')
 
         if name:
             queryset = queryset.filter(name__icontains=name)
         if category:
-            queryset = queryset.filter(category__icontains=category)
+            queryset = queryset.filter(category__name__icontains=category)
         if description:
             queryset = queryset.filter(description__icontains=description)
+        if price:
+            queryset = queryset.filter(price__icontains=price)
 
         return queryset
 
@@ -36,11 +38,10 @@ class ProductListView(ListView):
         context['name'] = self.request.GET.get('name', '')
         context['category'] = self.request.GET.get('category', '')
         context['description'] = self.request.GET.get('description', '')
+        context['price'] = self.request.GET.get('price', '')
 
 
         return context
-    
-from .forms import ProductForm
 
 def add_product(request):
     if request.method == "POST":

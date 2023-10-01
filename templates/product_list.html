@@ -1,10 +1,11 @@
-{% comment %} <form method="get" action="{% url 'product-list' %}">
+<h1>Lista productów</h1>
+<form method="get" action="{% url 'product-list' %}">
     <input type="text" name="name" placeholder="Nazwa" value="{{ name }}">
     <input type="text" name="category" placeholder="Kategoria" value="{{ category }}">
     <input type="text" name="description" placeholder="Opis" value="{{ description }}">
+    <input type="number" name="price" placeholder="Cena" value="{{ price }}">
     <button type="submit">Filtruj</button>
-</form> {% endcomment %}
-
+</form>
 <table>
     <thead>
         <tr>
