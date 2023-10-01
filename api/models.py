@@ -1,16 +1,12 @@
 from django.db import models
 from django.contrib.auth.models import User
+from PIL import Image
 
 # Create your models here.
-class Customer(models.Model):
+class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return self.user.username
-
-
-class Seller(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    is_client = models.BooleanField(default=False)
+    is_seller = models.BooleanField(default=False)
 
     def __str__(self):
         return self.user.username
@@ -36,9 +32,22 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+    
+    def save(self, *args, **kwargs):
+        super(Product, self).save(*args, **kwargs)
+
+        if self.thumbnail:
+            image = Image.open(self.thumbnail.path)
+            max_width = 200
+            print(image.width)
+            if image.width > max_width:
+                w_percent = max_width / float(image.width)
+                h_size = int(float(image.height) * float(w_percent))
+                image.thumbnail((max_width, h_size))
+                image.save(self.thumbnail.path)
 
 class Order(models.Model):
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    customer = models.ForeignKey(User, on_delete=models.CASCADE)
     shippingAddress = models.TextField()
     # items = models.ManyToManyField(Product, through='OrderItem')
     orderDate = models.DateTimeField(auto_now_add=True)
