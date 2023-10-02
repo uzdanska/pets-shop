@@ -5,32 +5,41 @@
     <title>Lista produktów</title>
 </head>
 <body>
+    <nav style="">
+        <a href="/login"> Zaloguj się </a>
+        <a href="/signup"> Zarejestruj się </a>
+    </nav>
+    <div style="padding: 8px; margin-left: 30px;">
     <h1>Lista productów</h1>
     <form method="get" action="{% url 'product-list' %}">
-        <input type="text" name="name" placeholder="Nazwa" value="{{ name }}">
-        <input type="text" name="category" placeholder="Kategoria" value="{{ category }}">
-        <input type="text" name="description" placeholder="Opis" value="{{ description }}">
-        <input type="number" name="price" placeholder="Cena" value="{{ price }}">
-        <select name="sort">
+        <input type="text" name="name" placeholder="Nazwa" value="{{ name }}" style="margin-right:10px;">
+        <input type="text" name="category" placeholder="Kategoria" value="{{ category }}" style="margin-right:10px;">
+        <input type="text" name="description" placeholder="Opis" value="{{ description }}" style="margin-right:10px;">
+        <input type="number" name="price" placeholder="Cena" value="{{ price }}" style="margin-right:10px;">
+        <select name="sort" style="margin-right:10px;">
             <option value="">Sortuj</option>
             <option value="name" {% if sort_by == 'name' %}selected{% endif %}>Nazwa</option>
             <option value="category" {% if sort_by == 'category' %}selected{% endif %}>Kategoria</option>
             <option value="price" {% if sort_by == 'price' %}selected{% endif %}>Cena</option>
         </select>
-        <button type="submit">Filtruj i Sortuj</button>
+        <button type="submit" style="margin-right:10px;">Filtruj i Sortuj</button>
 
         {% if user.userprofile.is_seller %}
-            <button> <a href='/products/add'> Dodaj produkt <a> </button>
+            <button> <a href='/products/add' style="text-decoration: none;"> Dodaj produkt <a> </button>
         {% endif %}
     </form>
-    <ul>
+    </div>
+    <ul style="list-style: none; margin-left: 0">
         {% for product in products %}
-            <li>
-                <h3>{{product.name}}</h3>
-                <img src={{product.thumbnail.url}}/>
-                <p>Kategoria: {{ product.category }}</p>
-                <p>Opis: {{ product.description }}</p>
-                <p>Cena: {{ product.price }}</p>
+            <li style="display: inline-block; margin-right: 35px; width: 320px; height: 450px; vertical-align: top; margin-bottom: 15px;  text-align: center;
+            border: 3px solid green;">
+                <h4>{{product.name}}</h4>
+                <img src={{product.thumbnail.url}} style="width: 200px"/>
+                <p style="font-size:13px; padding-left: 20px; text-align: justify;"><strong>{{ product.category }}</strong></p>
+                <p style="padding-left: 20px; padding-right: 20px; text-align: justify;
+                text-align-last: left;">{{ product.description|slice:":100" }}...</p>
+                <div style="text-align: justify; padding-left: 20px;">
+                <p>Cena: <strong>{{ product.price }} zł</strong></p>
                 <div style="display: inline-block;">
                     <form method="post" action="{% url 'edit_product' product.id %}" style="display: inline-block; margin-right: 10px;">
                         {% csrf_token %}
@@ -41,9 +50,11 @@
                         <button type="submit" class="delete-button">Usuń</button>
                     </form>
                 </div>
+            </div>
             </li>
         {% endfor %}
     </ul>
+
 
     <div class="pagination">
         <span class="step-links">
