@@ -23,10 +23,10 @@ class Category(models.Model):
 
 
 class Product(models.Model):
-    name = models.CharField(max_length=200)
-    description = models.TextField()
-    price = models.DecimalField(max_digits=6, decimal_places=2)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    name = models.CharField(max_length=200, null=False)
+    description = models.TextField(null=False)
+    price = models.DecimalField(max_digits=6, decimal_places=2, null=False)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, null=False)
     image = models.ImageField(upload_to='products/image')
     thumbnail = models.ImageField(upload_to='products/thumbnail')
 
@@ -46,10 +46,17 @@ class Product(models.Model):
                 image.thumbnail((max_width, h_size))
                 image.save(self.thumbnail.path)
 
+class OrderItem(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField()
+
+    def __str__(self):
+        return f'{self.product.name} - {self.quantity}'
+
 class Order(models.Model):
     customer = models.ForeignKey(User, on_delete=models.CASCADE)
     shippingAddress = models.TextField()
-    # items = models.ManyToManyField(Product, through='OrderItem')
+    orderItems = models.ManyToManyField(OrderItem)
     orderDate = models.DateTimeField(auto_now_add=True)
     paymentDue = models.DateTimeField()
     totalPrice = models.DecimalField(max_digits=12, decimal_places=2)
@@ -57,13 +64,6 @@ class Order(models.Model):
     def __str__(self):
         return f'{self.id}'
 
-class OrderItem(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField()
-
-    def __str__(self):
-        return f'{self.product.name} - {self.quantity}'
 
 
 

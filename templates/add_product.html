@@ -1,15 +1,36 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Dodaj Produkt</title>
-</head>
-<body>
-    <h1>Dodaj Nowy Produkt</h1>
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Dodaj Nowy Produkt</h1>
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Zapisz Zmiany</button>
-        <a href="/">Cofnij </a>
+        <div class="mb-3">
+            {{ form.name.label_tag }}
+            {{ form.name }}
+        </div>
+        <div class="mb-3">
+            {{ form.category.label_tag }}
+            {{ form.category }}
+        </div>
+        <div class="mb-3">
+            {{ form.description.label_tag }}
+            {{ form.description }}
+        </div>
+        <div class="mb-3">
+            {{ form.price.label_tag }}
+            {{ form.price }}
+        </div>
+        <div class="mb-3">
+            {{ form.image.label_tag }}
+            {{ form.image }}
+        </div>
+        <div class="mb-3">
+            {{ form.thumbnail.label_tag }}
+            {{ form.thumbnail }}
+        </div>
+        <button type="submit" class="btn btn-primary">Zapisz Zmiany</button>
+        <a href="/" class="btn btn-secondary">Cofnij</a>
     </form>
-</body>
-</html>
+</div>
+
+{% endblock %}

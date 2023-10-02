@@ -1,15 +1,28 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Edytuj produkt</title>
-</head>
-<body>
-    <h1>Edytuj produkt</h1>
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Edytuj produkt</h1>
     <form method="post">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Zapisz edycję</button>
-        <a href="/">Cofnij </a>
+        <div class="mb-3 d-flex gap-2">
+            {{ form.name.label_tag }}
+            {{ form.name | add_class:'form-control w-25 w-md-full' }}
+        </div>
+        <div class="mb-3">
+            {{ form.category.label_tag }}
+            {{ form.category }}
+        </div>
+        <div class="mb-3">
+            {{ form.description.label_tag }}
+            {{ form.description }}
+        </div>
+        <div class="mb-3">
+            {{ form.price.label_tag }}
+            {{ form.price }}
+        </div>
+        <a href="/" type="submit" class="btn btn-primary">Zapisz edycję</a>
+        <a href="/" class="btn btn-secondary ms-2">Cofnij</a>
     </form>
-</body>
-</html>
+</div>
+{% endblock %}

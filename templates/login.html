@@ -1,52 +1,31 @@
-{% load static %}
-
-<!DOCTYPE html>
-<html lang="en">
-
-
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="{% static 'assets/images/favicon.png' %}" rel="icon" type="image/png">
-    <title>Login</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
-
-<body>
-
-
-    <div id="wrapper" class="flex flex-col justify-between h-screen">
-
-        <!-- Content-->
-        <div>
-            <div>
-                <h1 class="lg:text-3xl text-xl font-semibold  mb-6 cursor-pointer"> Log in</h1>
-
-                <div>
-                    <style>
-                        h5{
-                            color: red;
-                        }
-                    </style>
-                    {% for message in messages%}
-                    <h5>{{message}}</h5>
-                    {%endfor%}
-                </div>
-
-
-                <form action="" method="POST">
-                    {% csrf_token %}
-                    <input type="text" name="username" placeholder="Username" style="border: 1px solid #d3d5d8 !important;">
-                    <input type="password" name="password" placeholder="Password">
-                    <button type="submit">Login</button>
-                </form>
-            </div>
+{% extends 'base.html' %}
+{% block content %}
+<div id="wrapper" class="d-flex flex-column justify-content-between min-vh-100">
+    <div class="container mt-5">
+        <div class="mb-4 text-center">
+            <h1 class="h3 mb-4">Log in</h1>
         </div>
+
+        <div class="mb-3">
+            {% for message in messages %}
+                <div class="alert alert-danger" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+
+        <form action="" method="POST">
+            {% csrf_token %}
+            <div class="mb-3">
+                <input type="text" class="form-control" name="username" placeholder="Username" required>
+            </div>
+            <div class="mb-3">
+                <input type="password" class="form-control" name="password" placeholder="Password" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Login</button>
+        </form>
     </div>
+</div>
 
-</body>
-
-
-</html>
+    
+{% endblock %}

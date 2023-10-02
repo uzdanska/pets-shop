@@ -1,13 +1,13 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404, reverse
 from django.contrib.auth.models import auth
 from django.contrib import messages
-from django.views.generic import ListView
+from django.views.generic import ListView, DetailView, View
 from .forms import ProductForm
 from django.core.paginator import Paginator
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from .serializers import ProductSerializer, OrderSerializer, OrderItemSerializer
-from .models import Product, Order, OrderItem
+from .models import Product, Order, OrderItem, Category
 from django.contrib.auth.decorators import login_required
 # Create your views here.
 
@@ -60,7 +60,7 @@ def view_product(request, pk):
         return render(request, 'product.html', {'product': product})
 
 
-@login_required(login_url='signin')
+@login_required(login_url='login')
 def add_product(request):
     if request.method == "POST":
         form = ProductForm(request.POST, request.FILES)
@@ -71,22 +71,26 @@ def add_product(request):
         form = ProductForm()
     return render(request, 'add_product.html', {'form': form})
 
+@login_required(login_url='login')
 def delete_product(request, pk):
     if request.method == "POST":
         product=Product.objects.get(id=pk)
         product.delete()
         return redirect('product-list')
     
+@login_required(login_url='login')  
 def edit_product(request, pk):
-    product = get_object_or_404(Product, pk=pk)
-    if request.method == "POST":
-        form = ProductForm(request.POST, request.FILES, instance=product)
-        if form.is_valid():
-            form.save()
-            return redirect('product_list')
-    else:
-        form = ProductForm(instance=product)
-    return render(request, 'edit_product.html', {'form': form, 'product': product})
+    product = get_object_or_404(Product, id=pk)
+
+    form = ProductForm(instance=product)
+
+    return render(request, 'edit_product.html', {'form': form, 'pk': pk})
+
+class OrderSummaryView(View):
+    # model = Order
+    def get(self, *args, **kwargs):
+        return render(self.request, "order_summary.html")
+    # template = "order_summary.html"
 
 def signin(request):
     if request.method=="POST":
