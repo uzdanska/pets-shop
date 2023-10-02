@@ -5,11 +5,19 @@
     <title>Lista produktów</title>
 </head>
 <body>
-    <nav style="">
-        <a href="/login"> Zaloguj się </a>
-        <a href="/signup"> Zarejestruj się </a>
-    </nav>
-    <div style="padding: 8px; margin-left: 30px;">
+    <div style="padding: 5px; margin-left: 30px;">
+    {% if user.is_authenticated %}
+        <p style="display: inline-block; margin-right: 20px;">Witaj, {{ user.username }}!</p>
+        <button style="display: inline-block">
+            <a style="text-decoration: none; color: black" href="{% url 'logout' %}">Wyloguj się</a>
+        </button>
+    {% else %}
+        <button style="display: inline-block">
+            <a style="text-decoration: none; color: black" href="{% url 'login' %}">Zaloguj się</a>
+        </button>
+    {% endif %}
+    </div>
+    <div style="padding: 5px; margin-left: 30px;">
     <h1>Lista productów</h1>
     <form method="get" action="{% url 'product-list' %}">
         <input type="text" name="name" placeholder="Nazwa" value="{{ name }}" style="margin-right:10px;">
@@ -31,26 +39,30 @@
     </div>
     <ul style="list-style: none; margin-left: 0">
         {% for product in products %}
-            <li style="display: inline-block; margin-right: 35px; width: 320px; height: 450px; vertical-align: top; margin-bottom: 15px;  text-align: center;
-            border: 3px solid green;">
-                <h4>{{product.name}}</h4>
-                <img src={{product.thumbnail.url}} style="width: 200px"/>
-                <p style="font-size:13px; padding-left: 20px; text-align: justify;"><strong>{{ product.category }}</strong></p>
-                <p style="padding-left: 20px; padding-right: 20px; text-align: justify;
-                text-align-last: left;">{{ product.description|slice:":100" }}...</p>
-                <div style="text-align: justify; padding-left: 20px;">
-                <p>Cena: <strong>{{ product.price }} zł</strong></p>
-                <div style="display: inline-block;">
-                    <form method="post" action="{% url 'edit_product' product.id %}" style="display: inline-block; margin-right: 10px;">
-                        {% csrf_token %}
-                        <button type="submit">Edytuj</button>
-                    </form>
-                    <form method="post" action="{% url 'delete_product' product.id %}" style="display: inline-block; margin-right: 10px;">
-                        {% csrf_token %}
-                        <button type="submit" class="delete-button">Usuń</button>
-                    </form>
-                </div>
-            </div>
+            <li style="display: inline-block; margin-right: 35px; width: 320px; height: 450px; vertical-align: top; margin-bottom: 15px; text-align: center; border: 3px solid green;">
+                <a href="{% url 'product' product.id %}" style="text-decoration: none">
+                    <h4>{{ product.name }}</h4>
+                    <img src="{{ product.thumbnail.url }}" style="width: 200px"/>
+                    <p style="font-size: 13px; padding-left: 20px; text-align: justify;"><strong>{{ product.category }}</strong></p>
+                    <p style="padding-left: 20px; padding-right: 20px; text-align: justify; text-align-last: left;">{{ product.description|slice:":100" }}...</p>
+                    <div style="text-align: justify; padding-left: 20px;">
+                        <p>Cena: <strong>{{ product.price }} zł</strong></p>
+                    </div>
+                    {% if user.userprofile.is_seller %}
+                        <div style="display: inline-block;">
+                            <form method="post" action="{% url 'edit_product' product.id %}" style="display: inline-block; margin-right: 10px;">
+                                {% csrf_token %}
+                                <button type="submit">Edytuj</button>
+                            </form>
+                            <form method="post" action="{% url 'delete_product' product.id %}" style="display: inline-block; margin-right: 10px;">
+                                {% csrf_token %}
+                                <button type="submit" class="delete-button">Usuń</button>
+                            </form>
+                        </div>
+                    {% endif %}
+
+                  
+                </a>
             </li>
         {% endfor %}
     </ul>

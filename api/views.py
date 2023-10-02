@@ -11,8 +11,6 @@ from .models import Product, Order, OrderItem
 from django.contrib.auth.decorators import login_required
 # Create your views here.
 
-
-
 class ProductListView(ListView):
     model = Product
     template_name = 'product_list.html'
@@ -55,7 +53,14 @@ class ProductListView(ListView):
 
         return context
 
-@login_required
+def view_product(request, pk):
+    if request.method == "GET":
+        product = Product.objects.get(id=pk)
+
+        return render(request, 'product.html', {'product': product})
+
+
+@login_required(login_url='signin')
 def add_product(request):
     if request.method == "POST":
         form = ProductForm(request.POST, request.FILES)
@@ -95,14 +100,17 @@ def signin(request):
             return redirect('/')
         else:
             messages.info(request, 'Credentials Invalid')
-            return redirect('signin')
+            return redirect('login')
     else:
         return render(request, 'login.html')
     
-@login_required(login_url='signin')
-def signup(request):
+@login_required(login_url='login')
+def logout(request):
     auth.logout(request)
-    return redirect('signin')
+    return redirect('/')
+    
+
+
 
 # class EditProductView(UpdateView):
 #     model = Product
