@@ -1,57 +1,56 @@
-from django.shortcuts import render, redirect, get_object_or_404, reverse
+from django.shortcuts import render, redirect, get_object_or_404
+from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import auth
 from django.contrib import messages
-from django.views.generic import ListView, DetailView, View
-from .forms import ProductForm
+from django.views.generic import View
+from .forms import ProductForm, OrderItemForm
 from django.core.paginator import Paginator
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from .serializers import ProductSerializer, OrderSerializer, OrderItemSerializer
 from .models import Product, Order, OrderItem, Category
 from django.contrib.auth.decorators import login_required
+from django.utils import timezone
 # Create your views here.
 
-class ProductListView(ListView):
-    model = Product
-    template_name = 'product_list.html'
-    context_object_name = 'products'
-    paginate_by = 3
+def product_list(request):
+    queryset = Product.objects.all()
+    name = request.GET.get('name', '')  # Domyślnie ustawione na pusty ciąg znaków, jeśli 'name' nie jest obecne w zapytaniu
+    category = request.GET.get('category', '')
+    description = request.GET.get('description', '')
+    price = request.GET.get('price', '')
+    sort_by = request.GET.get('sort')
 
-    def get_queryset(self):
-        queryset = Product.objects.all()
-        name = self.request.GET.get('name')
-        category = self.request.GET.get('category')
-        description = self.request.GET.get('description')
-        price = self.request.GET.get('price')
-        sort_by = self.request.GET.get('sort')
+    if name:
+        queryset = queryset.filter(name__icontains=name)
+    if category:
+        queryset = queryset.filter(category__name__icontains=category)
+    if description:
+        queryset = queryset.filter(description__icontains=description)
+    if price:
+        queryset = queryset.filter(price__icontains=price)
 
-        if name:
-            queryset = queryset.filter(name__icontains=name)
-        if category:
-            queryset = queryset.filter(category__name__icontains=category)
-        if description:
-            queryset = queryset.filter(description__icontains=description)
-        if price:
-            queryset = queryset.filter(price__icontains=price)
+    if sort_by == 'name':
+        queryset = queryset.order_by('name')
+    elif sort_by == 'category':
+        queryset = queryset.order_by('category__name')
+    elif sort_by == 'price':
+        queryset = queryset.order_by('price')
 
-        if sort_by == 'name':
-            queryset = queryset.order_by('name')
-        elif sort_by == 'category':
-            queryset = queryset.order_by('category__name')
-        elif sort_by == 'price':
-            queryset = queryset.order_by('price')
+    paginator = Paginator(queryset, 4)  # 3 items per page
+    page_number = request.GET.get('page')
+    products = paginator.get_page(page_number)
 
-        return queryset
+    context = {
+        'products': products,
+        'name': name,
+        'category': category,
+        'description': description,
+        'price': price,
+    }
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['name'] = self.request.GET.get('name', '')
-        context['category'] = self.request.GET.get('category', '')
-        context['description'] = self.request.GET.get('description', '')
-        context['price'] = self.request.GET.get('price', '')
-        context['products'] = self.get_queryset()
-
-        return context
+    return render(request, 'product_list.html', context)
 
 def view_product(request, pk):
     if request.method == "GET":
@@ -86,11 +85,64 @@ def edit_product(request, pk):
 
     return render(request, 'edit_product.html', {'form': form, 'pk': pk})
 
-class OrderSummaryView(View):
+class OrderSummaryView(LoginRequiredMixin, View):
     # model = Order
     def get(self, *args, **kwargs):
+        try:
+            
+            order = Order.objects.get(customer=self.request.user, ordered=False)
+            # print(order)
+            context = {
+                'object': order
+            }
+            print(order.get_total_price)
+            return render(self.request, 'order_summary.html', context)
+        except ObjectDoesNotExist:
+            messages.error(self.request, "You do not have a active order")
+            return redirect('/')
         return render(self.request, "order_summary.html")
-    # template = "order_summary.html"
+    
+class RemoveOrderItemView(View):
+    def post(self, request, order_item_id, *args, **kwargs):
+        order_item = get_object_or_404(OrderItem, id=order_item_id)
+        if order_item.quantity > 1:
+            order_item.quantity -= 1
+            print(order_item)
+            order_item.save()
+        else:
+            order_item.delete()
+        return redirect('/')
+        
+
+@login_required
+def add_to_cart(request, pk):
+    product = get_object_or_404(Product, id=pk)
+    order_item, created = OrderItem.objects.get_or_create(product=product, ordered=False, quantity=1)    
+
+    order_qs = Order.objects.filter(customer=request.user, ordered=False)
+    if order_qs.exists():
+        order = order_qs[0]
+        # check if the order item is in the order
+        if order.orderItems.filter(product__id=product.id).exists():
+            # If the item already exists in the order, increment the quantity
+            existing_order_item = order.orderItems.get(product__id=product.id)
+            existing_order_item.quantity += 1
+            existing_order_item.save()
+            messages.info(request, "Ten produkt został ponownie dodany do twojego koszyka")
+        else:
+            # If the item is not in the order, add it to the order
+            order.orderItems.add(order_item)
+            messages.info(request, "Ten produkt został dodany do twojego koszyka")
+
+        return redirect('/')
+    else:
+        ordered_date = timezone.now()
+        order = Order.objects.create(
+            customer=request.user, ordered_date=ordered_date)
+        order.items.add(order_item)
+        messages.info(request, "Ten produkt został dodany do twojego koszyka")
+        return redirect('/')
+ 
 
 def signin(request):
     if request.method=="POST":
@@ -114,33 +166,6 @@ def logout(request):
     return redirect('/')
     
 
-
-
-# class EditProductView(UpdateView):
-#     model = Product
-#     template_name= 'edit_product.html'
-#     fields = ['name', 'descrption', 'name', 'descrption', 'price', 'category', 'image', 'thumbnail']
-
-    
-
-# def product_list(request):
-#     # Filtrowanie
-#     category = request.GET.get('category')
-#     if category:
-#         products = Product.objects.filter(category=category)
-#     else:
-#         products = Product.objects.all()
-    
-#     # Sortowanie
-#     sort_by = request.GET.get('sort_by', 'name')  
-#     products = products.order_by(sort_by)
-    
-#     # Paginacja
-#     paginator = Paginator(products, 10)  # Pokazuj 10 produktów na stronę
-#     page = request.GET.get('page')
-#     products = paginator.get_page(page)
-    
-#     return render(request, 'product_list.html', {'products': products})
 
 @api_view(['GET'])
 def getProducts(request):

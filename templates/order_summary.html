@@ -1,69 +1,52 @@
-{% comment %} {% extends "base.html" %} {% endcomment %}
+{% extends 'base.html' %}
 
 {% block content %}
-  <main>
-    <div class="container">
-        <div class="table-responsive text-nowrap">
+  <div class="container mt-4">
+    <h1>Zestawienie zamówienia</h1>
 
-            <table class="table">
-              <thead>
-                <tr>
-                  <th scope="col">#</th>
-                  <th scope="col">Heading</th>
-                  <th scope="col">Heading</th>
-                  <th scope="col">Heading</th>
-                  <th scope="col">Heading</th>
-                  <th scope="col">Heading</th>
-                  <th scope="col">Heading</th>
-                  <th scope="col">Heading</th>
-                  <th scope="col">Heading</th>
-                  <th scope="col">Heading</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <th scope="row">1</th>
-                  <td>Cell</td>
-                  <td>Cell</td>
-                  <td>Cell</td>
-                  <td>Cell</td>
-                  <td>Cell</td>
-                  <td>Cell</td>
-                  <td>Cell</td>
-                  <td>Cell</td>
-                  <td>Cell</td>
-                </tr>
-                <tr>
-                  <th scope="row">2</th>
-                  <td>Cell</td>
-                  <td>Cell</td>
-                  <td>Cell</td>
-                  <td>Cell</td>
-                  <td>Cell</td>
-                  <td>Cell</td>
-                  <td>Cell</td>
-                  <td>Cell</td>
-                  <td>Cell</td>
-                </tr>
-                <tr>
-                  <th scope="row">3</th>
-                  <td>Cell</td>
-                  <td>Cell</td>
-                  <td>Cell</td>
-                  <td>Cell</td>
-                  <td>Cell</td>
-                  <td>Cell</td>
-                  <td>Cell</td>
-                  <td>Cell</td>
-                  <td>Cell</td>
-                </tr>
-              </tbody>
-            </table>
-          
-          </div>
+    {% if object %}
+      {% comment %} <h2>Zamówienie nr {{ object.id }}</h2>
+      <p>Data złożenia zamówienia: {{ object.orderDate }}</p>
+      <p>Adres dostawy: {{ object.shippingAddress }}</p> {% endcomment %}
 
-    </div>
-  </main>
+      <h3>Produkty w zamówieniu:</h3>
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Produkt</th>
+            <th scope="col">Cena</th>
+            <th scope="col">Ilość</th>
+            <th scope="col">Łączna cena</th>
+            <th scope="col">Usuń</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for order_item in object.orderItems.all %}
+            <tr>
+              <th scope="row">{{ forloop.counter }}</th>
+              <td>{{ order_item.product.name }}</td>
+              <td>{{ order_item.product.price }}</td>
+              <td>{{ order_item.quantity }}</td>
+              <td>{{ order_item.get_total_price}}</td>
+              <td><form method="post" action="{% url 'remove_order_item' order_item_id=order_item.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger btn-sm">Usuń</button>
+            </form></td>
+            </tr>
+          {% endfor %}
+            <tr>
+                <td colspan="4"><br>Cena całkowita</br></td>
+                <td colspan="5">{{object.get_total_price}} zł</td>
+            </tr>
+            <tr>
+                <td colspan="5"><a class="btn btn-success">Zamów</a></td>
+            </tr>
+        </tbody>
+      </table>
 
-{% endblock content %}
-
+    {% else %}
+      <p>Nie masz aktywnego zamówienia.</p>
+    {% endif %}
+  </div>
+{% endblock %}

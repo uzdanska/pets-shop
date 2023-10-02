@@ -5,15 +5,13 @@
         <div class="mb-4 text-center">
             <h1 class="h3 mb-4">Log in</h1>
         </div>
-
-        <div class="mb-3">
+        {% comment %} <div class="mb-3">
             {% for message in messages %}
                 <div class="alert alert-danger" role="alert">
                     {{ message }}
                 </div>
             {% endfor %}
-        </div>
-
+        </div> {% endcomment %}
         <form action="" method="POST">
             {% csrf_token %}
             <div class="mb-3">

@@ -49,9 +49,14 @@ class Product(models.Model):
 class OrderItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
+    ordered = models.BooleanField(default=False)
 
     def __str__(self):
         return f'{self.product.name} - {self.quantity}'
+    
+    def get_total_price(self):
+        return self.product.price * self.quantity
+
 
 class Order(models.Model):
     customer = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -59,10 +64,17 @@ class Order(models.Model):
     orderItems = models.ManyToManyField(OrderItem)
     orderDate = models.DateTimeField(auto_now_add=True)
     paymentDue = models.DateTimeField()
-    totalPrice = models.DecimalField(max_digits=12, decimal_places=2)
+    # totalPrice = models.DecimalField(max_digits=12, decimal_places=2)
+    ordered = models.BooleanField(default=False)
 
     def __str__(self):
         return f'{self.id}'
+    
+    def get_total_price(self):
+        total = 0
+        for item in self.orderItems.all():
+            total += item.get_total_price()
+        return total
 
 
 
