@@ -16,7 +16,7 @@ from django.utils import timezone
 
 def product_list(request):
     queryset = Product.objects.all()
-    name = request.GET.get('name', '')  # Domyślnie ustawione na pusty ciąg znaków, jeśli 'name' nie jest obecne w zapytaniu
+    name = request.GET.get('name', '')
     category = request.GET.get('category', '')
     description = request.GET.get('description', '')
     price = request.GET.get('price', '')
@@ -38,10 +38,10 @@ def product_list(request):
     elif sort_by == 'price':
         queryset = queryset.order_by('price')
 
-    paginator = Paginator(queryset, 4)  # 3 items per page
+    paginator = Paginator(Product.objects.get_queryset().order_by('id'), 4)  
     page_number = request.GET.get('page')
     products = paginator.get_page(page_number)
-
+    
     context = {
         'products': products,
         'name': name,
@@ -51,6 +51,7 @@ def product_list(request):
     }
 
     return render(request, 'product_list.html', context)
+
 
 def view_product(request, pk):
     if request.method == "GET":
@@ -79,11 +80,27 @@ def delete_product(request, pk):
     
 @login_required(login_url='login')  
 def edit_product(request, pk):
-    product = get_object_or_404(Product, id=pk)
+    product = get_object_or_404(Product, pk=pk)
+    print(product.image)
 
-    form = ProductForm(instance=product)
+    if request.method =="GET":
+        context = {'form': ProductForm(instance=product), 'id': pk}
+        return render(request, 'edit_product.html', context)
+    elif request.method=="POST":
+        form = ProductForm(request.POST, request.FILES, instance=product)
+        if form.is_valid():
+            if not request.FILES.get('image'):
+                form.cleaned_data['image'] = product.image
+            if not request.FILES.get('thumbnail'):
+                form.cleaned_data['thumbnail'] = product.thumbnail
+            form.save()
+            messages.success(request, 'Produkt został zauktualizowany pomyslnie')
+            return redirect('product', pk=pk)
+        else:
+            messages.error(request, "Prosze poprpawic bledy")
+            # print(messages)
+            return render(request, 'edit_product.html', {'form': form})
 
-    return render(request, 'edit_product.html', {'form': form, 'pk': pk})
 
 class OrderSummaryView(LoginRequiredMixin, View):
     # model = Order

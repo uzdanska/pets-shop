@@ -57,10 +57,7 @@
                             {% if user.userprofile.is_seller or user.userprofile.is_client %}
                             <div class="card-footer text-center">
                                 {% if user.userprofile.is_seller %}
-                                    <form method="post" action="{% url 'edit_product' product.id %}" class="d-inline mt-auto">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-primary btn-sm">Edytuj</button>
-                                    </form>
+                                    <a href="{% url 'edit_product' product.pk %}" type="button" class="btn btn-primary btn-sm">Edytuj</a>
                                     <form method="post" action="{% url 'delete_product' product.id %}" class="d-inline mt-auto">
                                         {% csrf_token %}
                                         <button type="submit" class="btn btn-danger btn-sm delete-button">Usuń</button>

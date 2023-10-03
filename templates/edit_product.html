@@ -3,7 +3,7 @@
 {% block content %}
 <div class="container mt-4">
     <h1 class="mb-4">Edytuj produkt</h1>
-    <form method="post">
+    <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="mb-3 d-flex gap-2">
             {{ form.name.label_tag }}
@@ -21,7 +21,21 @@
             {{ form.price.label_tag }}
             {{ form.price }}
         </div>
-        <a href="/" type="submit" class="btn btn-primary">Zapisz edycję</a>
+        <div>
+            <label for="{{ form.image.id_for_label }}">Zdjęcie:</label>
+            {{ form.image }}
+            {% if not form.image.value %}
+                <img src="{{ product.image.url }}" alt="Obecne zdjęcie" />
+            {% endif %}
+        </div>
+        <div>
+            <label for="{{ form.thumbnail.id_for_label }}">Miniatura:</label>
+            {{ form.thumbnail }}
+            {% if not form.thumbnail.value %}
+                <img src="{{ product.thumbnail.url }}" alt="Obecna miniatura" />
+            {% endif %}
+        </div>
+        <button type="submit" class="btn btn-primary">Zapisz edycję</button>
         <a href="/" class="btn btn-secondary ms-2">Cofnij</a>
     </form>
 </div>

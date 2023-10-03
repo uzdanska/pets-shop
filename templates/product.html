@@ -16,10 +16,7 @@
                 <p>Cena: <strong>{{ product.price }} zł</strong></p>
             </div>
             <div class="d-flex justify-content-center align-items-center">
-                <form method="post" action="{% url 'edit_product' product.id %}" class="me-3">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-primary">Edytuj</button>
-                </form>
+                <a href="{% url 'edit_product' product.pk %}" type="button" class="btn btn-primary btn-sm me-3">Edytuj</a>
                 <form method="post" action="{% url 'delete_product' product.id %}">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-danger delete-button">Usuń</button>
