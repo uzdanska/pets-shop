@@ -5,6 +5,7 @@ from PIL import Image
 # Create your models here.
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    firstname_lastname = models.CharField(max_length = 100, null=True)
     is_client = models.BooleanField(default=False)
     is_seller = models.BooleanField(default=False)
 
@@ -64,7 +65,6 @@ class Order(models.Model):
     orderItems = models.ManyToManyField(OrderItem)
     orderDate = models.DateTimeField(auto_now_add=True)
     paymentDue = models.DateTimeField()
-    # totalPrice = models.DecimalField(max_digits=12, decimal_places=2)
     ordered = models.BooleanField(default=False)
 
     def __str__(self):
@@ -75,6 +75,7 @@ class Order(models.Model):
         for item in self.orderItems.all():
             total += item.get_total_price()
         return total
+    
 
 
 

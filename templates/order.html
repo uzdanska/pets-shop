@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container mt-4">
+    <h1 class="mb-4">Podsumowanie zamówienia</h1>
+    <h5 class="mb-4">Termin płatności: {{ dateOfPayment }}</h5>
+    {% if object %}
+
+        <h5>Produkty w zamówieniu:</h5>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Produkt - Ilość</th>
+                    <th scope="col">Łączna cena</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order_item in object.orderItems.all %}
+                <tr>
+                    <th scope="row">{{ forloop.counter }}</th>
+                    <td>{{ order_item.product.name }} - {{order_item.quantity}} szt</td>
+                    <td>{{ order_item.get_total_price}}</td>
+                </tr>
+                {% endfor %}
+                <tr>
+                    <td colspan="2"><br>Cena całkowita</br></td>
+                    <td colspan="2">{{object.get_total_price}} zł</td>
+                </tr>
+            </tbody>
+        </table>
+    {% else %}
+      <p>Nie masz aktywnego zamówienia.</p>
+    {% endif %}
+  </div>
+{% endblock %}

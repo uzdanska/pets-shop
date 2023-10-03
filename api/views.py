@@ -4,15 +4,50 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import auth
 from django.contrib import messages
 from django.views.generic import View
-from .forms import ProductForm, OrderItemForm
+from .forms import ProductForm
 from django.core.paginator import Paginator
-from rest_framework.response import Response
-from rest_framework.decorators import api_view
-from .serializers import ProductSerializer, OrderSerializer, OrderItemSerializer
 from .models import Product, Order, OrderItem, Category
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
+from datetime import datetime, timedelta
 # Create your views here.
+
+@login_required(login_url='login')
+def order(request):
+    user = request.user
+    if user.is_authenticated:
+        try:
+            order = Order.objects.get(customer=request.user, ordered=False)
+
+            dateOfPayment = order.paymentDue + timedelta(days=5)
+
+            total_price = order.get_total_price()
+
+            context = {
+                'object': order, 
+                'dateOfPayment': dateOfPayment,
+                'total_price': total_price
+            }
+            order.ordered = True
+            order.save()
+
+            order_items = OrderItem.objects.filter(order=order)
+            for order_item in order_items:
+                order_item.ordered = True
+                order_item.save()
+
+            return render(request, 'order.html', context)
+        
+        except Order.DoesNotExist:
+            pass
+    
+    
+    # if user.is_authenticated:
+    #     order = Order.objects.get(customer=request.user, ordered=False)
+    #     context = {
+    #         'object': order
+    #     }
+    #     return render(request, 'order.html', context)
 
 def product_list(request):
     queryset = Product.objects.all()
@@ -114,7 +149,6 @@ class OrderSummaryView(LoginRequiredMixin, View):
             context = {
                 'object': order
             }
-            print(order.get_total_price)
             return render(self.request, 'order_summary.html', context)
         except ObjectDoesNotExist:
             messages.error(self.request, "You do not have a active order")
@@ -130,7 +164,17 @@ class RemoveOrderItemView(View):
             order_item.save()
         else:
             order_item.delete()
-        return redirect('/')
+        return redirect('order_summary')
+    
+class AddQuantityOrderItem(View):
+    def post(self, request, order_item_id, *args, **kwargs):
+        order_item = get_object_or_404(OrderItem, id=order_item_id)
+        if order_item.quantity > 1:
+            order_item.quantity += 1
+            print(order_item)
+            order_item.save()
+        
+        return redirect('order_summary')
         
 
 @login_required
@@ -186,20 +230,20 @@ def logout(request):
     
 
 
-@api_view(['GET'])
-def getProducts(request):
-    product = Product.objects.all()
-    serializer = ProductSerializer(product, many=True)
-    return Response(serializer.data)
+# @api_view(['GET'])
+# def getProducts(request):
+#     product = Product.objects.all()
+#     serializer = ProductSerializer(product, many=True)
+#     return Response(serializer.data)
 
-@api_view(['GET'])
-def getOrdersItem(request):
-    orderItem = OrderItem.objects.all()
-    serializer = OrderItemSerializer(orderItem, many=True)
-    return Response(serializer.data)
+# @api_view(['GET'])
+# def getOrdersItem(request):
+#     orderItem = OrderItem.objects.all()
+#     serializer = OrderItemSerializer(orderItem, many=True)
+#     return Response(serializer.data)
 
-@api_view(['GET'])
-def getOrders(request):
-    order = Order.objects.all()
-    serializer = OrderSerializer(order, many=True)
-    return Response(serializer.data)
+# @api_view(['GET'])
+# def getOrders(request):
+#     order = Order.objects.all()
+#     serializer = OrderSerializer(order, many=True)
+#     return Response(serializer.data)

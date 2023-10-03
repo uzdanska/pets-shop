@@ -5,45 +5,48 @@
     <h1>Zestawienie zamówienia</h1>
 
     {% if object %}
-      {% comment %} <h2>Zamówienie nr {{ object.id }}</h2>
-      <p>Data złożenia zamówienia: {{ object.orderDate }}</p>
-      <p>Adres dostawy: {{ object.shippingAddress }}</p> {% endcomment %}
+        <p>Imię i Nazwisko: <strong>{{ user.userprofile.firstname_lastname}}</strong></p>
+        <p>Adres Dostawy: <strong>{{ object.shippingAddress }}</strong></p>
 
-      <h3>Produkty w zamówieniu:</h3>
-      <table class="table">
-        <thead>
-          <tr>
-            <th scope="col">#</th>
-            <th scope="col">Produkt</th>
-            <th scope="col">Cena</th>
-            <th scope="col">Ilość</th>
-            <th scope="col">Łączna cena</th>
-            <th scope="col">Usuń</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for order_item in object.orderItems.all %}
+        <h5>Produkty w zamówieniu:</h5>
+        <table class="table">
+          <thead>
             <tr>
-              <th scope="row">{{ forloop.counter }}</th>
-              <td>{{ order_item.product.name }}</td>
-              <td>{{ order_item.product.price }}</td>
-              <td>{{ order_item.quantity }}</td>
-              <td>{{ order_item.get_total_price}}</td>
-              <td><form method="post" action="{% url 'remove_order_item' order_item_id=order_item.id %}">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-danger btn-sm">Usuń</button>
-            </form></td>
+              <th scope="col">#</th>
+              <th scope="col">Produkt</th>
+              <th scope="col">Cena</th>
+              <th scope="col">Ilość</th>
+              <th scope="col">Usuń</th>
+              <th scope="col">Dodaj</th>
             </tr>
-          {% endfor %}
-            <tr>
-                <td colspan="4"><br>Cena całkowita</br></td>
-                <td colspan="5">{{object.get_total_price}} zł</td>
-            </tr>
-            <tr>
-                <td colspan="5"><a class="btn btn-success">Zamów</a></td>
-            </tr>
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {% for order_item in object.orderItems.all %}
+              <tr>
+                <th scope="row">{{ forloop.counter }}</th>
+                  <td>{{ order_item.product.name }}</td>
+                  <td>{{ order_item.product.price }}</td>
+                  <td>{{ order_item.quantity }}</td>
+                  <td>
+                    <form method="post" action="{% url 'remove_order_item' order_item_id=order_item.id %}">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-danger btn-sm">-</button>
+                    </form>
+                  </td>
+                  <td>
+                    <form method="post" action="{% url 'add_quantity_order_item' order_item_id=order_item.id %}">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-success btn-sm">+</button>
+                    </form>
+                  </td>
+                </th>
+              </tr>
+            {% endfor %}
+              <tr>
+                <td colspan="5"><a href="{% url 'order' %}" class="btn btn-primary">Zamów</a></td>
+              </tr>
+          </tbody>
+        </table>
 
     {% else %}
       <p>Nie masz aktywnego zamówienia.</p>
