@@ -21,6 +21,7 @@ def product_list(request):
     description = request.GET.get('description', '')
     price = request.GET.get('price', '')
     sort_by = request.GET.get('sort')
+    categories = Category.objects.all()
 
     if name:
         queryset = queryset.filter(name__icontains=name)
@@ -38,7 +39,7 @@ def product_list(request):
     elif sort_by == 'price':
         queryset = queryset.order_by('price')
 
-    paginator = Paginator(Product.objects.get_queryset().order_by('id'), 4)  
+    paginator = Paginator(queryset, 4) 
     page_number = request.GET.get('page')
     products = paginator.get_page(page_number)
     
@@ -48,6 +49,7 @@ def product_list(request):
         'category': category,
         'description': description,
         'price': price,
+        'categories': categories
     }
 
     return render(request, 'product_list.html', context)

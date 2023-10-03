@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="container mt-4">
-    <div class="row border p-4">
+    <div class="row border p-2">
         <div class="col-md-6">
             <img src="{{ product.image.url }}" class="img-fluid" alt="{{ product.name }}">
         </div>
@@ -16,11 +16,13 @@
                 <p>Cena: <strong>{{ product.price }} zł</strong></p>
             </div>
             <div class="d-flex justify-content-center align-items-center">
-                <a href="{% url 'edit_product' product.pk %}" type="button" class="btn btn-primary btn-sm me-3">Edytuj</a>
-                <form method="post" action="{% url 'delete_product' product.id %}">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-danger delete-button">Usuń</button>
-                </form>
+                {% if user.userprofile.is_seller %}
+                    <a href="{% url 'edit_product' product.pk %}" type="button" class="btn btn-primary btn-sm me-3">Edytuj</a>
+                    <form method="post" action="{% url 'delete_product' product.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger delete-button">Usuń</button>
+                    </form>
+                {% endif  %}
             </div>
         </div>
         

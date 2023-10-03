@@ -9,39 +9,8 @@
         {% endfor %}
     </div>
     <h1>Lista produktów</h1>
-    <form class="mb-3" method="get" action="{% url 'product-list' %}">
-        <div class="row g-2">
-            <div class="col-md-2">
-                <input type="text" class="form-control" name="name" placeholder="Nazwa" value="{{ name }}">
-            </div>
-            <div class="col-md-2">
-                <input type="text" class="form-control" name="category" placeholder="Kategoria" value="{{ category }}">
-            </div>
-            <div class="col-md-2">
-                <input type="text" class="form-control" name="description" placeholder="Opis" value="{{ description }}">
-            </div>
-            <div class="col-md-1">
-                <input type="number" class="form-control" name="price" placeholder="Cena" value="{{ price }}">
-            </div>
-            <div class="col-md-1">
-                <select class="form-select" name="sort">
-                    <option value="">Sortuj</option>
-                    <option value="name" {% if sort_by == 'name' %}selected{% endif %}>Nazwa</option>
-                    <option value="category" {% if sort_by == 'category' %}selected{% endif %}>Kategoria</option>
-                    <option value="price" {% if sort_by == 'price' %}selected{% endif %}>Cena</option>
-                </select>
-            </div>
-            <div class="col-md-2">
-                <button type="submit" class="btn btn-primary">Filtruj i Sortuj</button>
-            </div>
-            <div class="col-md-2 text-end">
-                {% if user.userprofile.is_seller %}
-                    <a href='/products/add' class="btn btn-success">Dodaj produkt</a>
-                {% endif %}
-            </div>
-        </div>
-    </form>
     
+    {% include 'filtring_sorting.html'%}
 
     <div class="row">
         {% for product in products %}
