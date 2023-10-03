@@ -64,7 +64,7 @@ class Order(models.Model):
     shippingAddress = models.TextField()
     orderItems = models.ManyToManyField(OrderItem)
     orderDate = models.DateTimeField(auto_now_add=True)
-    paymentDue = models.DateTimeField()
+    paymentDue = models.DateTimeField(null=True)
     ordered = models.BooleanField(default=False)
 
     def __str__(self):

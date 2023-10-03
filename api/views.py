@@ -18,7 +18,7 @@ def order(request):
     if user.is_authenticated:
         try:
             order = Order.objects.get(customer=request.user, ordered=False)
-
+            order.paymentDue = datetime.now()
             dateOfPayment = order.paymentDue + timedelta(days=5)
 
             total_price = order.get_total_price()
@@ -40,14 +40,6 @@ def order(request):
         
         except Order.DoesNotExist:
             pass
-    
-    
-    # if user.is_authenticated:
-    #     order = Order.objects.get(customer=request.user, ordered=False)
-    #     context = {
-    #         'object': order
-    #     }
-    #     return render(request, 'order.html', context)
 
 def product_list(request):
     queryset = Product.objects.all()
@@ -201,8 +193,8 @@ def add_to_cart(request, pk):
     else:
         ordered_date = timezone.now()
         order = Order.objects.create(
-            customer=request.user, ordered_date=ordered_date)
-        order.items.add(order_item)
+            customer=request.user, orderDate=ordered_date)
+        order.orderItems.add(order_item)
         messages.info(request, "Ten produkt został dodany do twojego koszyka")
         return redirect('/')
  

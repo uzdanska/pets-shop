@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Potwierdzenie zamówienia</title>
+</head>
+<body>
+    <h1>Potwierdzenie zamówienia #{{ order.id }}</h1>
+    <p>Dziękujemy za złożenie zamówienia w naszym sklepie. Poniżej znajdziesz szczegóły zamówienia:</p>
+    
+    <h2>Produkty:</h2>
+    <ul>
+        {% for item in order.items.all %}
+            <li>{{ item.product.name }} - {{ item.quantity }} szt. x {{ item.product.price }} zł/szt. = {{ item.product.price|mul:item.quantity }} zł</li>
+        {% endfor %}
+    </ul>
+    
+    <p><strong>Sumaryczna cena produktów: {{ total_price }} zł</strong></p>
+    <p><strong>Termin płatności: {{ payment_due_date|date:"Y-m-d" }}</strong></p>
+    
+    <p>Prosimy o dokonanie płatności przed terminem płatności. Po zaksięgowaniu płatności zamówienie zostanie wysłane na podany adres.</p>
+    
+    <p>Dziękujemy za zakupy!</p>
+    
+    <p>Pozdrawiamy,<br>
+    Zespół Naszego Sklepu</p>
+</body>
+</html>
