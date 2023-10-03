@@ -4,13 +4,40 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import auth
 from django.contrib import messages
 from django.views.generic import View
-from .forms import ProductForm
+from .forms import ProductForm, StatsForm
 from django.core.paginator import Paginator
 from .models import Product, Order, OrderItem, Category
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from datetime import datetime, timedelta
 # Create your views here.
+
+@login_required
+def stats(request):
+    if request.method == 'POST':
+        form = StatsForm(request.POST)
+        if form.is_valid():
+            start_date = form.cleaned_data['start_date']
+            end_date = form.cleaned_data['end_date']
+            num_result_products = form.cleaned_data['num_result_products']
+            orders_in_date_range = Order.objects.filter(orderDate__range=(start_date, end_date), ordered=True)
+
+            product_quantity = {}
+            for order in orders_in_date_range:
+                order_items = order.orderItems.all()
+                for order_item in order_items:
+                    product_name = order_item.product.name
+                    # print(f"Product: {product_name}, Quantity: {order_item.quantity}")
+                    product_quantity[product_name] = order_item.quantity
+            sorted_product_quantity = sorted(product_quantity.items(), key=lambda x: x[1], reverse=True)
+
+            result_product = sorted_product_quantity[:num_result_products]
+            return render(request, 'stats_result.html', {'result_product': result_product, 'start_date': start_date, 'end_date': end_date})
+    else:
+        form =StatsForm()
+
+        return render(request, 'stats.html', {'form': form})
+
 
 @login_required(login_url='login')
 def order(request):
@@ -161,9 +188,10 @@ class RemoveOrderItemView(View):
 class AddQuantityOrderItem(View):
     def post(self, request, order_item_id, *args, **kwargs):
         order_item = get_object_or_404(OrderItem, id=order_item_id)
-        if order_item.quantity > 1:
+        if order_item.quantity >= 1:
             order_item.quantity += 1
             print(order_item)
+            print(order_item.quantity)
             order_item.save()
         
         return redirect('order_summary')

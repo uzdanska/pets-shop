@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Top {{ result_product|length }} Products in {{start_date}} - {{end_date}}:</h1>
+    <ul>
+        {% for product, count in result_product %}
+            <li>{{ product }} - {{ count }} sztuk</li>
+        {% empty %}
+            <li>Brak produktów do wyświetlenia.</li>
+        {% endfor %}
+    </ul>
+
+
+{% endblock %}

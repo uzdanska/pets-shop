@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "api.apps.ApiConfig",
     "rest_framework",
     "widget_tweaks",
+    'bootstrap_datepicker_plus',
 
 ]
 
