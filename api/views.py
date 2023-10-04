@@ -1,5 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.mail import EmailMessage
+from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import auth
 from django.contrib import messages
@@ -9,7 +11,8 @@ from django.core.paginator import Paginator
 from .models import Product, Order, OrderItem, Category
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
-from datetime import datetime, timedelta
+from datetime import  timedelta
+from .tasks import send_payment_reminder_email
 # Create your views here.
 
 @login_required
@@ -20,7 +23,8 @@ def stats(request):
             start_date = form.cleaned_data['start_date']
             end_date = form.cleaned_data['end_date']
             num_result_products = form.cleaned_data['num_result_products']
-            orders_in_date_range = Order.objects.filter(orderDate__range=(start_date, end_date), ordered=True)
+            orders_in_date_range = Order.objects.filter(orderDate__range=(start_date, end_date))
+            # orders_in_date_range = Order.objects.filter(orderDate__range=(start_date, end_date), ordered=True)
 
             product_quantity = {}
             for order in orders_in_date_range:
@@ -44,7 +48,7 @@ def order(request):
     if user.is_authenticated:
         try:
             order = Order.objects.get(customer=request.user, ordered=False)
-            order.paymentDue = datetime.now()
+            order.paymentDue = timezone.now()
             dateOfPayment = order.paymentDue + timedelta(days=5)
 
             total_price = order.get_total_price()
@@ -54,8 +58,27 @@ def order(request):
                 'dateOfPayment': dateOfPayment,
                 'total_price': total_price
             }
-            order.ordered = True
-            order.save()
+
+            if order.paymentDue == dateOfPayment -  timedelta(days=1) :
+                eta = dateOfPayment - timezone.timedelta(days=1)
+                send_payment_reminder_email.apply_async(args=[request.user.email], eta=eta)
+            elif order.paymentDue == dateOfPayment:
+                order.ordered = True
+                order.save()
+
+            # Send mail
+            if settings.EMAIL_HOST_USER != "example@gmail.com":
+                email = EmailMessage(
+                    'Potwierdzenie zamówienia',
+                    f"Dziękujemy za złożenie zamówienia {order.customer}. Kwota zamówienia wynosi {total_price}", 
+                    settings.EMAIL_HOST_USER, 
+                    [request.user.email]
+                )
+                email.fail_silently = False
+                email.content_subtype = "html" 
+                email.send()
+
+            
 
             order_items = OrderItem.objects.filter(order=order)
             for order_item in order_items:
@@ -65,7 +88,7 @@ def order(request):
             return render(request, 'order.html', context)
         
         except Order.DoesNotExist:
-            pass
+            return redirect('/')
 
 def product_list(request):
     queryset = Product.objects.all()
@@ -113,7 +136,6 @@ def view_product(request, pk):
         product = Product.objects.get(id=pk)
 
         return render(request, 'product.html', {'product': product})
-
 
 @login_required(login_url='login')
 def add_product(request):

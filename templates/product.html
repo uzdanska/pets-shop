@@ -9,9 +9,9 @@
             <div class="d-flex justify-content-end mb-4">
                 <img src="{{ product.thumbnail.url }}" class="img-fluid" alt="{{ product.name }}" style="max-width: 200px;">
             </div>
-            <div class="mb-4">
+            <div class="mb-4 ps-2 pe-2">
                 <h2>{{ product.name }}</h2>
-                <p class="font-italic">{{ product.category }}</p>
+                <p style="max-height: 30px; min-height:30px;"><strong>{{ product.category }}</strong></p>
                 <p class="text-justify">{{ product.description }}</p>
                 <p>Cena: <strong>{{ product.price }} zł</strong></p>
             </div>

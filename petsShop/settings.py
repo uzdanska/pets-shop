@@ -28,6 +28,18 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+# settings.py
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.example.com'  
+EMAIL_PORT = 587  
+EMAIL_USE_TLS = True  
+EMAIL_HOST_USER = "example@gmail.com"
+EMAIL_HOST_PASSWORD = "password"
+
+CELERY_BROKER_URL = 'redis://localhost:6379/0' 
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0' 
+
 
 # Application definition
 
@@ -135,4 +147,3 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 COMPRESS_ROOT = BASE_DIR / 'static'
 
 COMPRESS_ENABLED = True
-
