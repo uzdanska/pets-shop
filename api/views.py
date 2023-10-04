@@ -27,7 +27,6 @@ def stats(request):
                 order_items = order.orderItems.all()
                 for order_item in order_items:
                     product_name = order_item.product.name
-                    # print(f"Product: {product_name}, Quantity: {order_item.quantity}")
                     product_quantity[product_name] = order_item.quantity
             sorted_product_quantity = sorted(product_quantity.items(), key=lambda x: x[1], reverse=True)
 
@@ -170,9 +169,8 @@ class OrderSummaryView(LoginRequiredMixin, View):
             }
             return render(self.request, 'order_summary.html', context)
         except ObjectDoesNotExist:
-            messages.error(self.request, "You do not have a active order")
+            messages.error(self.request, "Nie masz nic w koszyku. Dodaj produkt aby wyświetlić jego zawartość.")
             return redirect('/')
-        return render(self.request, "order_summary.html")
     
 class RemoveOrderItemView(View):
     def post(self, request, order_item_id, *args, **kwargs):

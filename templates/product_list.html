@@ -12,19 +12,32 @@
     
     {% include 'filtring_sorting.html'%}
 
+    <div class="pagination mt-4 mb-4 ">
+        <span class="step-links">
+            {% if products.has_previous %}
+                <a href="?page=1" class="btn btn-secondary btn-sm">&laquo; pierwsza</a>
+                <a href="?page={{ products.previous_page_number }}" class="btn btn-secondary btn-sm">poprzednia</a>
+            {% endif %}
+            {% if products.has_next %}
+                <a href="?page={{ products.next_page_number }}" class="btn btn-secondary btn-sm">następna</a>
+                <a href="?page={{ products.paginator.num_pages }}" class="btn btn-secondary btn-sm">ostatnia &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
+
     <div class="row">
         {% for product in products %}
-            <div class="col-md-3 mb-4">
-                <div class="card" style="border: 3px solid green;">
+            <div class="col-md-3 mb-2">
+                <div class="card border">
                     <a href="{% url 'product' product.id %}" style="text-decoration: none; color: inherit;" class="h-100">
-                        <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
-                        <div class="card-body d-flex flex-column h-100">
-                            <h5 class="card-title">{{ product.name }}</h5>
-                            <p class="card-text"><strong>{{ product.category }}</strong></p>
-                            <p class="card-text">{{ product.description|slice:":100" }}...</p>
-                            <p class="card-text">Cena: <strong>{{ product.price }} zł</strong></p>
+                        <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="max-height: 280px; min-height:280px;">
+                        <div class="card-body d-flex flex-column ">
+                            <h5 class="card-title ps-2" style="max-height: 70px; min-height:70px;" >{{ product.name }}</h5>
+                            <p class="card-text ps-2" style="max-height: 30px; min-height:30px;"><strong>{{ product.category }}</strong></p>
+                            <p class="card-text ps-2" style="font-size:12px">{{ product.description|slice:":100" }}...</p>
+                            <p class="card-text ps-2" style="font-size:14px">Cena: <strong>{{ product.price }} zł</strong></p>
                             {% if user.userprofile.is_seller or user.userprofile.is_client %}
-                            <div class="card-footer text-center">
+                            <div class="card-footer text-center bg-light">
                                 {% if user.userprofile.is_seller %}
                                     <a href="{% url 'edit_product' product.pk %}" type="button" class="btn btn-primary btn-sm">Edytuj</a>
                                     <form method="post" action="{% url 'delete_product' product.id %}" class="d-inline mt-auto">
@@ -34,14 +47,13 @@
                                 {% endif %}
                                 
                                 {% if user.userprofile.is_client %}
-                                    <form method="post" action="{% url 'add-to-cart' product.pk %}" class="mt-3">
+                                    <form method="post" action="{% url 'add-to-cart' product.pk %}" class="m-3">
                                         {% csrf_token %}
                                         <input type="hidden" name="product_id" value="{{ product.id }}">
                                         <button type="submit" class="btn btn-primary btn-sm">Dodaj do koszyka</button>
                                     </form>
                                 {% endif %}
                             </div>
-                            
                             {% endif %}
                         </div>
                     </a>
@@ -50,7 +62,7 @@
         {% endfor %}
     </div>    
 
-    <div class="pagination mt-4">
+    <div class="pagination mt-4 mb-4 ">
         <span class="step-links">
             {% if products.has_previous %}
                 <a href="?page=1" class="btn btn-secondary btn-sm">&laquo; pierwsza</a>
@@ -65,20 +77,3 @@
 </div>
 
 {% endblock %}
-{% comment %} 
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            var deleteButtons = document.querySelectorAll('.delete-button');
-            deleteButtons.forEach(function(button) {
-                button.addEventListener('click', function() {
-                    var confirmation = confirm("Czy jesteś pewien usunięcia?");
-                    if (confirmation) {
-                        // Tutaj umieść kod, który wywoła usunięcie produktu, na przykład AJAX request lub przekierowanie do widoku usuwania
-                    }
-                });
-            });
-        });
-    </script>
-</body>
-</html> {% endcomment %}
-

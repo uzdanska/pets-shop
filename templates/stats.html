@@ -1,11 +1,12 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-{{ form.media }}
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Wyślij</button>
-</form>
+<div class="container mt-4">
+    <h1 class="mb-5">Formularz Statystyk</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Zapisz</button>
+    </form>
+</div>
 {% endblock %}
