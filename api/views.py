@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
-from django.core.mail import EmailMessage
+from django.core.mail import EmailMessage, send_mail
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import auth
@@ -69,15 +69,9 @@ def order(request):
 
             # Send mail
             if settings.EMAIL_HOST_USER != "example@gmail.com":
-                email = EmailMessage(
-                    'Potwierdzenie zamówienia',
-                    f"Dziękujemy za złożenie zamówienia {order.customer}. Kwota zamówienia wynosi {total_price}", 
-                    settings.EMAIL_HOST_USER, 
-                    [request.user.email]
-                )
-                email.fail_silently = False
-                email.content_subtype = "html" 
-                email.send()
+                subject = "Potwierdzenie zamówienia"
+                message = f"Dziękujemy za złożenie zamówienia {order.customer}. Kwota zamówienia wynosi {total_price}"
+                send_mail(subject, message, settings.EMAIL_HOST_USER, [request.user.mail])
 
             
 

@@ -37,8 +37,15 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "example@gmail.com"
 EMAIL_HOST_PASSWORD = "password"
 
-CELERY_BROKER_URL = 'redis://localhost:6379/0' 
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0' 
+
+# set the celery broker url 
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+  
+# set the celery result backend 
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+  
+# set the celery timezone 
+CELERY_TIMEZONE = 'UTC'
 
 
 # Application definition
