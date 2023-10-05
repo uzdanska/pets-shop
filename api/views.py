@@ -62,9 +62,10 @@ def order(request):
             if order.paymentDue == dateOfPayment -  timedelta(days=1) :
                 eta = dateOfPayment - timezone.timedelta(days=1)
                 send_payment_reminder_email.apply_async(args=[request.user.email], eta=eta)
-            elif order.paymentDue == dateOfPayment:
+            else:
                 order.ordered = True
                 order.save()
+
 
             # Send mail
             if settings.EMAIL_HOST_USER != "example@gmail.com":
