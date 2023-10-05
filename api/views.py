@@ -20,20 +20,24 @@ def stats(request):
     if request.method == 'POST':
         form = StatsForm(request.POST)
         if form.is_valid():
+            # get the dat from statsforms
             start_date = form.cleaned_data['start_date']
             end_date = form.cleaned_data['end_date']
             num_result_products = form.cleaned_data['num_result_products']
-            orders_in_date_range = Order.objects.filter(orderDate__range=(start_date, end_date))
-            # orders_in_date_range = Order.objects.filter(orderDate__range=(start_date, end_date), ordered=True)
-
+            # orders_in_date_range = Order.objects.filter(orderDate__range=(start_date, end_date))
+            orders_in_date_range = Order.objects.filter(orderDate__range=(start_date, end_date), ordered=True)
+            
+            # read the product and quantity from order and orderItems variable in model Order
             product_quantity = {}
             for order in orders_in_date_range:
                 order_items = order.orderItems.all()
                 for order_item in order_items:
                     product_name = order_item.product.name
                     product_quantity[product_name] = order_item.quantity
+            # sorting dictionary base on qunatity but from max to min
             sorted_product_quantity = sorted(product_quantity.items(), key=lambda x: x[1], reverse=True)
 
+            # extracts the top products based on the user's specified number of desired results.
             result_product = sorted_product_quantity[:num_result_products]
             return render(request, 'stats_result.html', {'result_product': result_product, 'start_date': start_date, 'end_date': end_date})
     else:
@@ -48,21 +52,22 @@ def order(request):
     if user.is_authenticated:
         try:
             order = Order.objects.get(customer=request.user, ordered=False)
-            order.paymentDue = timezone.now()
-            dateOfPayment = order.paymentDue + timedelta(days=5)
+            # Ustawienie daty płatności na 5 dni do przodu od złozenia zamówienia
+            order.paymentDue = order.orderDate + timedelta(days=5)
 
             total_price = order.get_total_price()
 
             context = {
                 'object': order, 
-                'dateOfPayment': dateOfPayment,
+                'dateOfPayment': order.paymentDue,
                 'total_price': total_price
             }
 
-            if order.paymentDue == dateOfPayment -  timedelta(days=1) :
-                eta = dateOfPayment - timezone.timedelta(days=1)
+            if order.orderDate == order.paymentDue -  timedelta(days=1) :
+                eta = order.paymentDue - timezone.timedelta(days=1)
                 send_payment_reminder_email.apply_async(args=[request.user.email], eta=eta)
             else:
+                # ordered set to True to allow users to add new items to the cart and not see the old ones.
                 order.ordered = True
                 order.save()
 
@@ -74,7 +79,7 @@ def order(request):
                 send_mail(subject, message, settings.EMAIL_HOST_USER, [request.user.mail])
 
             
-
+            # also set ordered to True
             order_items = OrderItem.objects.filter(order=order)
             for order_item in order_items:
                 order_item.ordered = True
@@ -87,13 +92,16 @@ def order(request):
 
 def product_list(request):
     queryset = Product.objects.all()
+    categories = Category.objects.all()
+
+    # Get values using request.GET
     name = request.GET.get('name', '')
     category = request.GET.get('category', '')
     description = request.GET.get('description', '')
     price = request.GET.get('price', '')
     sort_by = request.GET.get('sort')
-    categories = Category.objects.all()
 
+    # Filters products based on values from the GET request" in English.
     if name:
         queryset = queryset.filter(name__icontains=name)
     if category:
@@ -103,6 +111,7 @@ def product_list(request):
     if price:
         queryset = queryset.filter(price__icontains=price)
 
+    # Sort product 
     if sort_by == 'name':
         queryset = queryset.order_by('name')
     elif sort_by == 'category':
@@ -110,6 +119,7 @@ def product_list(request):
     elif sort_by == 'price':
         queryset = queryset.order_by('price')
 
+    # Pagination
     paginator = Paginator(queryset, 4) 
     page_number = request.GET.get('page')
     products = paginator.get_page(page_number)
@@ -175,12 +185,10 @@ def edit_product(request, pk):
 
 
 class OrderSummaryView(LoginRequiredMixin, View):
-    # model = Order
     def get(self, *args, **kwargs):
         try:
             
             order = Order.objects.get(customer=self.request.user, ordered=False)
-            # print(order)
             context = {
                 'object': order
             }
@@ -262,23 +270,3 @@ def signin(request):
 def logout(request):
     auth.logout(request)
     return redirect('/')
-    
-
-
-# @api_view(['GET'])
-# def getProducts(request):
-#     product = Product.objects.all()
-#     serializer = ProductSerializer(product, many=True)
-#     return Response(serializer.data)
-
-# @api_view(['GET'])
-# def getOrdersItem(request):
-#     orderItem = OrderItem.objects.all()
-#     serializer = OrderItemSerializer(orderItem, many=True)
-#     return Response(serializer.data)
-
-# @api_view(['GET'])
-# def getOrders(request):
-#     order = Order.objects.all()
-#     serializer = OrderSerializer(order, many=True)
-#     return Response(serializer.data)
