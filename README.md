@@ -24,6 +24,12 @@ Należy zainstalować wszystkie pakety z pliku 'requirements.txt' używając kom
 Aby uruchomić aplikację przejść do lokalizacji gdzie znajduje się plik 'manage.py' i użyć komendy:
 ```python manage.py runserver```
 
+## Testowanie
+
+W projekcie znajduja się również testy modeli aby je uruchomić należy użyć komendy:
+
+```python manage.py test```
+
 ## Podsumowanie 
 
 W designie aplikacji znajdują się każda funkcjonalność oprócz rejestracji użytkownika, która została wykonana z poziomu admina.
@@ -36,3 +42,4 @@ Dane do zalogowania klienta:
   * Sprzedawca: 
     * login: seller1
     * hasło: 1234
+
